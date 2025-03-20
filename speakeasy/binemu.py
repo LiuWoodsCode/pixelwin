@@ -113,8 +113,8 @@ class BinaryEmulator(MemoryManager):
 
         self.config_analysis = config.get('analysis', {})
         self.max_instructions = config.get('max_instructions', -1)
-        self.timeout = config.get('timeout', 0)
-        self.max_api_count = config.get('max_api_count', 5000)
+        self.timeout = 9223372036854775807
+        self.max_api_count = 9223372036854775807
         self.exceptions = config.get('exceptions', {})
         self.drive_config = config.get('drives', [])
         self.filesystem_config = config.get('filesystem', {})

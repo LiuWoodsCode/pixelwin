@@ -1,9 +1,9 @@
 {
-    "config_version": 0.2,
+    "config_version": 0.3,
     "description": "Default emulation profile to use when not overridden by user",
     "emu_engine": "unicorn",
-    "timeout": 9223372036854775807,
-    "max_api_count": 9223372036854775807,
+    "timeout": 0,
+    "max_api_count": 0,
     "system": "windows",
 
     "analysis": {

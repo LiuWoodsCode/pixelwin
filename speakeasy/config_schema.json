@@ -86,7 +86,8 @@
         "config_version": {
             "type": "number",
             "enum": [
-                0.2
+                0.2,
+                0.3
             ],
             "description": "config format version"
         },
