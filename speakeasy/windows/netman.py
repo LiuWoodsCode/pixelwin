@@ -2,6 +2,7 @@
 
 import io
 import os
+import requests  # Added import for real HTTP responses
 from urllib.parse import urlparse
 from io import BytesIO
 from speakeasy.errors import NetworkEmuError
@@ -190,10 +191,10 @@ class WininetRequest(WininetComponent):
 
     def get_response(self):
         """
-        Check the configuration file so see if there is a
-        handler for the current WinInet request
+        Check the configuration file to see if there is a
+        handler for the current WinInet request. If no handler
+        is found, fetch a real HTTP response.
         """
-
         cfg = WininetComponent.config
 
         if self.response:
@@ -235,6 +236,15 @@ class WininetRequest(WininetComponent):
                         default_resp_path = normalize_response_path(default_resp_path)
                         with open(default_resp_path, 'rb') as f:
                             self.response = BytesIO(f.read())
+
+        # If no predefined response is found, fetch a real HTTP response
+        if not self.response:
+            url = f"{'https' if self.is_secure() else 'http'}://{self.get_server()}{self.objname.path}"
+            try:
+                real_response = requests.request(self.verb.upper(), url, headers=self.format_http_request())
+                self.response = BytesIO(real_response.content)
+            except requests.RequestException as e:
+                raise NetworkEmuError(f"Failed to fetch real HTTP response: {e}")
 
         return self.response
 
