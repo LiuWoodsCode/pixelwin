@@ -205,7 +205,8 @@ class WininetRequest(WininetComponent):
             raise NetworkEmuError('No HTTP configuration supplied')
         resps = http.get('responses')
         if not resps:
-            raise NetworkEmuError('No HTTP responses supplied')
+            # raise NetworkEmuError('No HTTP responses supplied')
+            pass
 
         self.response = None
         for res in resps:
