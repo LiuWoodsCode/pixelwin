@@ -4,6 +4,8 @@ import re
 import json
 import fnmatch
 import traceback
+import socket
+import os
 from typing import List, Tuple, Dict
 
 import binascii
@@ -99,12 +101,13 @@ class BinaryEmulator(MemoryManager):
                 self.emu_eng = eng()
         if not self.emu_eng:
             raise EmuException('Unsupported emulation engine: %s' % (_eng))
-
+        
+        username = os.getlogin()
         self.osversion = config.get('os_ver', {})
         self.env = config.get('env', {})
-        self.user_config = config.get('user', {})
+        self.user_config = f"{{'name': '{username}', 'is_admin': True, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
         self.domain = config.get('domain')
-        self.hostname = config.get('hostname')
+        self.hostname = socket.gethostname()
         self.symlinks = config.get('symlinks', [])
         self.config_modules = config.get('modules', {})
         self.config_system_modules = self.config_modules.get('system_modules', [])

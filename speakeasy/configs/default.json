@@ -41,10 +41,10 @@
 
     "domain": "speakeasy_domain",
 
-    "hostname": "speakeasy_host",
+    "hostname": "DoNotUse-TheSystemWillPullYourSystemHostnameAutomatically",
 
     "user": {
-        "name": "speakeasy_user",
+        "name": "DoNotUse-TheSystemWillPullYourSystemUsernameAutomatically",
         "is_admin": true,
         "sid": "S-1-5-21-1111111111-2222222222-3333333333-1001"
     },
