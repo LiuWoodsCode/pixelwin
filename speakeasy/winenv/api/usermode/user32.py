@@ -4,6 +4,7 @@ import speakeasy.winenv.arch as _arch
 import speakeasy.windows.sessman as sessman
 import speakeasy.winenv.defs.windows.user32 as windefs
 import speakeasy.winenv.defs.windows.windef as windef
+import speakeasy.messagebox as messagebox
 
 from .. import api
 
@@ -315,26 +316,125 @@ class User32(api.ApiHandler):
         hwnd, crKey, bAlpha, dwFlags = argv
         return 1
 
+    def get_messagebox_return_value_name(value):
+        """ Lookup function for MessageBox return values """
+        messagebox_returns = {
+            1: "IDOK",
+            2: "IDCANCEL",
+            3: "IDABORT",
+            4: "IDRETRY",
+            5: "IDIGNORE",
+            6: "IDYES",
+            7: "IDNO",
+            10: "IDTRYAGAIN",
+            11: "IDCONTINUE"
+        }
+
+        return messagebox_returns.get(value)
+
     @apihook('MessageBox', argc=4)
     def MessageBox(self, emu, argv, ctx={}):
-        '''int MessageBox(
-          HWND    hWnd,
-          LPCTSTR lpText,
-          LPCTSTR lpCaption,
-          UINT    uType
-        );'''
+        """ MessageBox API Hook
+        int MessageBox(
+            HWND    hWnd,
+            LPCTSTR lpText,
+            LPCTSTR lpCaption,
+            UINT    uType
+        );
+
+        Arguments:
+            hWnd      (HWND)    - Handle to the owner window (can be NULL)
+            lpText    (LPCTSTR) - Pointer to the message text (can be None)
+            lpCaption (LPCTSTR) - Pointer to the caption text (can be None)
+            uType     (UINT)    - Bitfield defining message box style and buttons
+        
+        Returns:
+            (int) IDCANCEL by default
+        """
+
+        # Define structured types for parsing
+        ArgumentTypes = {
+            "hWnd": "HWND",
+            "lpText": "LPCTSTR",
+            "lpCaption": "LPCTSTR",
+            "uType": "UINT"
+        }
+
+        uTypeFlags = {
+            "buttons": {
+                0x0: "OK",
+                0x1: "OK_CANCEL",
+                0x2: "ABORT_RETRY_IGNORE",
+                0x3: "YES_NO_CANCEL",
+                0x4: "YES_NO",
+                0x5: "RETRY_CANCEL",
+                0x6: "CANCEL_TRY_CONTINUE"
+            },
+            "icon": {
+                0x10: "ICON_HAND",
+                0x20: "ICON_QUESTION",
+                0x30: "ICON_EXCLAMATION",
+                0x40: "ICON_ASTERISK"
+            },
+            "default_button": {
+                0x0: "BUTTON_1",
+                0x100: "BUTTON_2",
+                0x200: "BUTTON_3",
+                0x300: "BUTTON_4"
+            },
+            "modality": {
+                0x0: "APP_MODAL",
+                0x1000: "SYSTEM_MODAL",
+                0x2000: "TASK_MODAL"
+            }
+        }
+
+        # Unpack arguments
         hWnd, lpText, lpCaption, uType = argv
 
         cw = self.get_char_width(ctx)
-
+        # Determine character width (ANSI/Unicode)
         if lpText:
             text = self.read_mem_string(lpText, cw)
             argv[1] = text
         if lpCaption:
             cap = self.read_mem_string(lpCaption, cw)
             argv[2] = cap
-        rv = IDCANCEL
+        # Update arguments list with resolved string
 
+        # Parse uType into its structured format
+        parsed_utype = {
+            "buttons": uTypeFlags["buttons"].get(uType & 0xF, "UNKNOWN"),
+            "icon": uTypeFlags["icon"].get(uType & 0xF0, "NO_ICON"),
+            "default_button": uTypeFlags["default_button"].get(uType & 0xF00, "DEFAULT_BUTTON_1"),
+            "modality": uTypeFlags["modality"].get(uType & 0xF000, "DEFAULT_MODAL"),
+            "other_flags": hex(uType & ~0xFFFF)  # Preserve any unknown/custom flags in hex
+        }
+
+        # Structure output data for parsing/debugging
+        parsed_data = {
+            "arguments": {
+                "hWnd": {
+                    "type": ArgumentTypes["hWnd"],
+                    "value": hWnd
+                },
+                "lpText": {
+                    "type": ArgumentTypes["lpText"],
+                    "value": argv[1]
+                },
+                "lpCaption": {
+                    "type": ArgumentTypes["lpCaption"],
+                    "value": argv[2]
+                },
+                "uType": {
+                    "type": ArgumentTypes["uType"],
+                    "raw_value": uType,
+                    "parsed": parsed_utype
+                }
+            }
+        }
+        print(parsed_data)
+        rv = messagebox.show_messagebox(parsed_data)
         return rv
 
     @apihook('MessageBoxEx', argc=5)
