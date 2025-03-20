@@ -102,10 +102,11 @@ class BinaryEmulator(MemoryManager):
         if not self.emu_eng:
             raise EmuException('Unsupported emulation engine: %s' % (_eng))
         
-        username = os.getlogin()
+        
         self.osversion = config.get('os_ver', {})
         self.env = config.get('env', {})
         try:
+            username = os.getlogin()
             self.user_config = f"{{'name': '{username}', 'is_admin': True, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
         except Exception as e:
             print(f"Error getting username: {e}")
