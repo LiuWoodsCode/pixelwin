@@ -105,9 +105,17 @@ class BinaryEmulator(MemoryManager):
         username = os.getlogin()
         self.osversion = config.get('os_ver', {})
         self.env = config.get('env', {})
-        self.user_config = f"{{'name': '{username}', 'is_admin': True, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
+        try:
+            self.user_config = f"{{'name': '{username}', 'is_admin': True, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
+        except Exception as e:
+            print(f"Error getting username: {e}")
+            self.user_config = f"{{'name': 'liuwoods', 'is_admin': False, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
         self.domain = config.get('domain')
-        self.hostname = socket.gethostname()
+        try:
+            self.hostname = socket.gethostname()
+        except Exception as e:
+            print(f"Error getting hostname: {e}")
+            self.hostname = 'localhost'
         self.symlinks = config.get('symlinks', [])
         self.config_modules = config.get('modules', {})
         self.config_system_modules = self.config_modules.get('system_modules', [])
