@@ -109,6 +109,7 @@ class BinaryEmulator(MemoryManager):
             username = os.getlogin()
             self.user_config = f"{{'name': '{username}', 'is_admin': True, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
         except Exception as e:
+            
             print(f"Error getting username: {e}")
             self.user_config = f"{{'name': 'liuwoods', 'is_admin': False, 'sid': 'S-1-5-21-1111111111-2222222222-3333333333-1001'}}"
         self.domain = config.get('domain')

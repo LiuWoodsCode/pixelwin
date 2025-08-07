@@ -433,7 +433,6 @@ class User32(api.ApiHandler):
                 }
             }
         }
-        print(parsed_data)
         rv = messagebox.show_messagebox(parsed_data)
         return rv
 

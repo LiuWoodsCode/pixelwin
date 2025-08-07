@@ -47,12 +47,16 @@ def show_messagebox(parsed_data):
     uType = parsed_data["arguments"]["uType"]["parsed"]
 
     buttons = uType["buttons"]
+    # Unless I'm getting something wrong, I don't think tkinker has a way to specify a "no icon" state, so we just default to info
+    # Also, these GitHub Copilot suggestions are getting out of hand... I mean, look at this! (could you at least have some fun?)
     icon = icon_map.get(uType["icon"], "info")
    
     if buttons in ["ABORT_RETRY_IGNORE", "CANCEL_TRY_CONTINUE"]:
+        # this is the worst workaround ever but it works...
         TK_AVAILABLE = False  # Force console mode for these button types
     
     # Try to import tkinter, fallback to console mode if unavailable
+    # why is this here?
     try:
         import tkinter as tk
         from tkinter import messagebox
