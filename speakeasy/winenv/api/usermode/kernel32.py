@@ -6108,4 +6108,37 @@ class Kernel32(api.ApiHandler):
         '''
         return 1
 
+    @apihook('GetProfileStringW', argc=5)
+    def GetProfileStringW(self, emu, argv, ctx={}):
+        '''
+        DWORD GetProfileStringW(
+          LPCWSTR lpAppName,
+          LPCWSTR lpKeyName,
+          LPCWSTR lpDefault,
+          LPWSTR  lpReturnedString,
+          DWORD   nSize
+        );
+        (Stub) Returns lpDefault (or empty string) into lpReturnedString.
+        '''
+        lpAppName, lpKeyName, lpDefault, lpReturnedString, nSize = argv
+        cw = self.get_char_width(ctx)
+        # Read inputs (best effort)
+        app = self.read_mem_string(lpAppName, cw) if lpAppName else ''
+        key = self.read_mem_string(lpKeyName, cw) if lpKeyName else ''
+        default = self.read_mem_string(lpDefault, cw) if lpDefault else ''
+        argv[0] = app
+        argv[1] = key
+        argv[2] = default
 
+        if not lpReturnedString or nSize == 0:
+            return 0
+
+        out = default
+        # Truncate to fit (leave room for null terminator)
+        if len(out) >= nSize:
+            out = out[:nSize - 1]
+
+        self.write_mem_string(out + '\x00', lpReturnedString, cw)
+        emu.set_last_error(windefs.ERROR_SUCCESS)
+        return len(out)
+        

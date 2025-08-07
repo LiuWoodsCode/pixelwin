@@ -1158,6 +1158,7 @@ class User32(api.ApiHandler):
           LPPOINT lpPoint
         );
         """
+
         lpPoint = argv[0]
         point = windef.POINT(emu.get_ptr_size())
         point.x = 0
@@ -1529,3 +1530,16 @@ class User32(api.ApiHandler):
         # >>> ctypes.windll.user32.GetDoubleClickTime()
         # 500
         return 500
+
+    @apihook("GetProcessDefaultLayout", argc=1)
+    def GetProcessDefaultLayout(self, emu, argv, ctx={}):
+        '''
+        BOOL GetProcessDefaultLayout(
+            DWORD *pdwDefaultLayout
+        );
+        Returns current process default layout (0 = LTR).
+        '''
+        pdwDefaultLayout, = argv
+        if pdwDefaultLayout:
+            self.mem_write(pdwDefaultLayout, (0).to_bytes(4, 'little'))
+        return 1
